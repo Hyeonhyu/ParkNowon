@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>🚙 파크노원 🚗</title>
+</head>
+<body>
+  <h1>노원구 공영주차장 찾기</h1>
+  <div id="map" style="width:100%; height:500px;"></div>
+
+  <script type="text/javascript"
+    src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=여기에API키입력">
+  </script>
+  <script>
+    var map = new naver.maps.Map('map', {
+      center: new naver.maps.LatLng(37.6543, 127.0568), // 노원구 중심
+      zoom: 12
+    });
+  </script>
+</body>
+</html>
