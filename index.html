@@ -20,44 +20,6 @@
       font-size: 2.2rem;
       color: #005f99;
     }
-    .map-container {
-      position: relative;
-      max-width: 100%;
-      margin-bottom: 30px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      background: #fff;
-    }
-    .map-container img {
-      width: 100%;
-      display: block;
-      user-select: none;
-      pointer-events: none;
-      border-radius: 12px;
-    }
-    /* 마커 */
-    .marker {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background-color: #ff6b6b;
-      border: 3px solid #fff;
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
-      cursor: default;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .marker:hover {
-      transform: scale(1.4);
-      box-shadow: 0 0 15px rgba(255, 107, 107, 1);
-    }
-    .marker-1 { top: 210px; left: 320px; }
-    .marker-2 { top: 340px; left: 460px; }
-    .marker-3 { top: 150px; left: 180px; }
-
-    /* 버튼 영역 */
     .btn-container {
       text-align: center;
       margin-bottom: 40px;
@@ -68,7 +30,7 @@
       border: none;
       border-radius: 25px;
       padding: 12px 28px;
-      margin: 0 12px;
+      margin: 8px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
@@ -81,15 +43,9 @@
       transform: translateY(-3px);
       box-shadow: 0 6px 14px rgba(0,122,204,0.5);
     }
-    .parking-btn:focus {
-      outline: 2px solid #005f99;
-      outline-offset: 2px;
-    }
-
-    /* 상세 정보 카드 */
     .detail-card {
       max-width: 600px;
-      margin: 0 auto 60px;
+      margin: 0 auto 40px;
       background: white;
       border-radius: 16px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -129,136 +85,98 @@
       line-height: 30px;
       text-align: center;
       box-shadow: 0 2px 6px rgba(255, 107, 107, 0.7);
-      transition: background-color 0.3s ease;
     }
     .close-btn:hover {
       background: #e04343;
     }
-
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* 반응형 */
-    @media (max-width: 600px) {
-      body {
-        margin: 20px 10px;
-      }
-      h1 {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-      }
-      .parking-btn {
-        padding: 10px 20px;
-        margin: 8px 6px;
-        font-size: 0.9rem;
-      }
-      .detail-card {
-        padding: 20px 18px;
-        font-size: 1rem;
-      }
-      .marker {
-        width: 16px;
-        height: 16px;
-        border-width: 2px;
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
   <h1>🚙 파크노원 - 노원구 공영주차장 안내 🚗</h1>
 
-  <div class="btn-container" role="tablist" aria-label="주차장 선택 버튼">
-    <button class="parking-btn" role="tab" aria-selected="false" aria-controls="detail-1" id="tab-1" data-parking="1">노원역 공영주차장</button>
-    <button class="parking-btn" role="tab" aria-selected="false" aria-controls="detail-2" id="tab-2" data-parking="2">중계동 공영주차장</button>
-    <button class="parking-btn" role="tab" aria-selected="false" aria-controls="detail-3" id="tab-3" data-parking="3">상계동 공영주차장</button>
+  <div class="btn-container">
+    <button class="parking-btn" data-target="p1">상계근린공원</button>
+    <button class="parking-btn" data-target="p2">상계테니스장</button>
+    <button class="parking-btn" data-target="p3">공릉근린공원</button>
+    <button class="parking-btn" data-target="p4">상계3,4단지</button>
+    <button class="parking-btn" data-target="p5">노원문화의거리</button>
+    <button class="parking-btn" data-target="p6">공릉역환승</button>
   </div>
 
-  <div class="map-container" aria-label="노원구 공영주차장 위치 지도">
-    <img src="nowon_map_sample.jpg" alt="노원구 지도 이미지" />
-    <div class="marker marker-1" title="노원역 공영주차장 위치"></div>
-    <div class="marker marker-2" title="중계동 공영주차장 위치"></div>
-    <div class="marker marker-3" title="상계동 공영주차장 위치"></div>
+  <!-- 주차장 상세 정보 -->
+  <div id="p1" class="detail-card">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>상계근린공원</h3>
+    <p><strong>주소:</strong> 서울 노원구 상계동 729</p>
+    <p><strong>운영시간:</strong> 24시간</p>
+    <p><strong>요금:</strong> 5분당 150원</p>
   </div>
 
-  <!-- 상세 정보 -->
-  <section aria-live="polite" aria-atomic="true">
-    <article id="detail-1" class="detail-card" role="tabpanel" aria-labelledby="tab-1" hidden>
-      <button class="close-btn" aria-label="노원역 공영주차장 정보 닫기">&times;</button>
-      <h3>노원역 공영주차장</h3>
-      <p><strong>주소:</strong> 서울 노원구 동일로 123</p>
-      <p><strong>운영 시간:</strong> 24시간 연중무휴</p>
-      <p><strong>요금:</strong> 10분당 300원</p>
-      <p>지하철 7호선 노원역과 바로 연결되어 있어 접근성이 뛰어납니다. 넓은 주차 공간과 CCTV로 안전하게 관리되고 있습니다.</p>
-    </article>
+  <div id="p2" class="detail-card">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>상계테니스장</h3>
+    <p><strong>주소:</strong> 서울 노원구 상계동 759</p>
+    <p><strong>운영시간:</strong> 07:00 ~ 22:00</p>
+    <p><strong>요금:</strong> 5분당 150원</p>
+  </div>
 
-    <article id="detail-2" class="detail-card" role="tabpanel" aria-labelledby="tab-2" hidden>
-      <button class="close-btn" aria-label="중계동 공영주차장 정보 닫기">&times;</button>
-      <h3>중계동 공영주차장</h3>
-      <p><strong>주소:</strong> 서울 노원구 중계로 456</p>
-      <p><strong>운영 시간:</strong> 07:00 ~ 22:00</p>
-      <p><strong>요금:</strong> 30분당 1,000원</p>
-      <p>중계동 중심가에 위치해 있으며, 주차 공간이 넉넉하고 인근 상점과 식당 이용이 편리합니다.</p>
-    </article>
+  <div id="p3" class="detail-card">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>공릉근린공원</h3>
+    <p><strong>주소:</strong> 서울 노원구 공릉동 242</p>
+    <p><strong>운영시간:</strong> 07:00 ~ 22:00</p>
+    <p><strong>요금:</strong> 5분당 150원</p>
+  </div>
 
-    <article id="detail-3" class="detail-card" role="tabpanel" aria-labelledby="tab-3" hidden>
-      <button class="close-btn" aria-label="상계동 공영주차장 정보 닫기">&times;</button>
-      <h3>상계동 공영주차장</h3>
-      <p><strong>주소:</strong> 서울 노원구 상계로 789</p>
-      <p><strong>운영 시간:</strong> 06:00 ~ 23:00</p>
-      <p><strong>요금:</strong> 10분당 400원</p>
-      <p>상계동 주민센터 인근에 위치해 있으며, 주차 요금이 합리적이고 안전한 주차 환경을 제공합니다.</p>
-    </article>
-  </section>
+  <div id="p4" class="detail-card">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>상계3,4단지</h3>
+    <p><strong>주소:</strong> 서울 노원구 상계동 731</p>
+    <p><strong>운영시간:</strong> 07:00 ~ 22:00</p>
+    <p><strong>요금:</strong> 5분당 150원</p>
+  </div>
+
+  <div id="p5" class="detail-card">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>노원문화의거리</h3>
+    <p><strong>주소:</strong> 서울 노원구 상계동 1254</p>
+    <p><strong>운영시간:</strong> 09:00 ~ 22:00</p>
+    <p><strong>요금:</strong> 5분당 150원</p>
+  </div>
+
+  <div id="p6" class="detail-card">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>공릉역환승</h3>
+    <p><strong>주소:</strong> 서울 노원구 공릉동 232-21</p>
+    <p><strong>운영시간:</strong> 24시간</p>
+    <p><strong>요금:</strong> 5분당 150원</p>
+  </div>
 
   <script>
-    const buttons = document.querySelectorAll('.parking-btn');
-    const details = document.querySelectorAll('.detail-card');
+    const btns = document.querySelectorAll(".parking-btn");
+    const cards = document.querySelectorAll(".detail-card");
+    const closeBtns = document.querySelectorAll(".close-btn");
 
-    function showDetail(index) {
-      details.forEach((detail, i) => {
-        if (i === index) {
-          detail.hidden = false;
-          detail.classList.add('active');
-          buttons[i].setAttribute('aria-selected', 'true');
-          detail.focus();
-        } else {
-          detail.hidden = true;
-          detail.classList.remove('active');
-          buttons[i].setAttribute('aria-selected', 'false');
-        }
-      });
-    }
-
-    buttons.forEach((btn, i) => {
-      btn.addEventListener('click', () => {
-        // 이미 활성화된 버튼이면 닫기
-        if (btn.getAttribute('aria-selected') === 'true') {
-          details[i].hidden = true;
-          details[i].classList.remove('active');
-          btn.setAttribute('aria-selected', 'false');
-          btn.focus();
-        } else {
-          showDetail(i);
-        }
+    btns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.dataset.target;
+        cards.forEach(card => {
+          if (card.id === targetId) {
+            card.classList.add("active");
+          } else {
+            card.classList.remove("active");
+          }
+        });
       });
     });
 
-    // 닫기 버튼 기능
-    const closeBtns = document.querySelectorAll('.close-btn');
-    closeBtns.forEach((closeBtn, i) => {
-      closeBtn.addEventListener('click', () => {
-        details[i].hidden = true;
-        details[i].classList.remove('active');
-        buttons[i].setAttribute('aria-selected', 'false');
-        buttons[i].focus();
+    closeBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        btn.parentElement.classList.remove("active");
       });
     });
   </script>
