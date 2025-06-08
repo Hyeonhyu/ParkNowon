@@ -186,10 +186,13 @@
   </div>
 
   <section style="padding: 20px; text-align: center;">
-  <h2>🚗 운전 연습 영상 추천</h2>
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
-    
-    <div>
+<h2>🚗 운전 연습 영상 추천</h2>
+
+<div class="video-carousel">
+  <button class="carousel-btn left" onclick="prevVideo()">&#10094;</button>
+
+  <div class="video-wrapper">
+    <div class="video-slide active">
       <iframe width="100%" height="200" 
         src="https://www.youtube.com/embed/영상ID1" 
         title="운전 연습 영상 1" 
@@ -199,8 +202,8 @@
       </iframe>
       <p>🔰 초보 운전자 필수 팁</p>
     </div>
-    
-    <div>
+
+    <div class="video-slide">
       <iframe width="100%" height="200" 
         src="https://www.youtube.com/embed/영상ID2" 
         title="운전 연습 영상 2" 
@@ -211,7 +214,7 @@
       <p>🅿️ 주차 마스터 되기</p>
     </div>
 
-    <div>
+    <div class="video-slide">
       <iframe width="100%" height="200" 
         src="https://www.youtube.com/embed/영상ID3" 
         title="운전 연습 영상 3" 
@@ -221,9 +224,10 @@
       </iframe>
       <p>🚥 도로 주행 실전 연습</p>
     </div>
-
   </div>
-</section>
+
+  <button class="carousel-btn right" onclick="nextVideo()">&#10095;</button>
+</div>
 
 
   <!-- 주차장 상세 정보 -->
