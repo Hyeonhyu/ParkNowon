@@ -340,16 +340,29 @@
     // 버튼 클릭시 카드 표시 및 상태, 지도 초기화
     btns.forEach(btn => {
       btn.addEventListener("click", () => {
-        const targetId = btn.dataset.target;
-        cards.forEach(card => {
-          if (card.id === targetId) {
-            card.classList.add("active");
-            updateStatus(card, parkingData[targetId]);
-            initMap(targetId, parkingData[targetId].coords);
-            resetFeeCalculator(card);
-          } else {
-            card.classList.remove("active");
-          }
+btns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const targetId = btn.dataset.target;
+
+    // 모든 카드 숨기기
+    cards.forEach(card => {
+      card.style.display = "none";
+      card.classList.remove("active");
+    });
+
+    // 클릭한 버튼에 해당하는 카드만 보이기
+    const targetCard = document.getElementById(targetId);
+    if (targetCard) {
+      targetCard.style.display = "block";
+      targetCard.classList.add("active");
+
+      updateStatus(targetCard, parkingData[targetId]);
+      initMap(targetId, parkingData[targetId].coords);
+      resetFeeCalculator(targetCard);
+    }
+  });
+});
+
         });
       });
     });
