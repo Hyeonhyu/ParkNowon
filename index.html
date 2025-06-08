@@ -183,6 +183,13 @@
     <button class="parking-btn" data-target="p4">등나무근린공원</button>
     <button class="parking-btn" data-target="p5">상계2동 공영주차장</button>
     <button class="parking-btn" data-target="p6">한글비 공영주차장</button>
+    <!-- 버튼 추가 -->
+<button class="parking-btn" data-target="p7">불암산 공영주차장</button>
+<button class="parking-btn" data-target="p8">마들스포츠타운 공영주차장</button>
+<button class="parking-btn" data-target="p9">상계역 서측 공영주차장</button>
+<button class="parking-btn" data-target="p10">동막골 공영주차장</button>
+<button class="parking-btn" data-target="p11">구청부설주차장</button>
+
   </div>
 
   <!-- 주차장 상세 정보 -->
@@ -280,6 +287,23 @@
       <div class="fee-result"></div>
     </div>
     <div id="map-p6" class="map" style="width:100%;height:300px;border-radius:16px;margin-top:20px;"></div>
+    <!-- detail-card 예시: p7 -->
+<div id="p7" class="detail-card">
+  <button class="close-btn">&times;</button>
+  <h3>불암산 공영주차장</h3>
+  <p><strong>주소:</strong> 서울 노원구 중계동 산26</p>
+  <p><strong>운영시간:</strong> 09:00 ~ 19:00</p>
+  <p><strong>요금:</strong> 5분당 150원</p>
+  <div class="status"></div>
+  <div class="fee-calculator">
+    <label for="time-p7">주차 시간(분):</label>
+    <input type="number" id="time-p7" min="0" />
+    <button data-target="p7">요금 계산</button>
+    <div class="fee-result"></div>
+  </div>
+  <div id="map-p7" class="map"></div>
+</div>
+
   </div>
 
   <!-- 카카오 지도 API -->
@@ -336,6 +360,13 @@
         feePerUnit: 200,
         coords: { lat: 37.6550, lng: 127.0612 }
       }
+      // parkingData 객체에 추가
+p7: { name: "불암산 공영주차장", openTime: "09:00", closeTime: "19:00", unitTime: 5, feePerUnit: 150, coords: { lat: /*실 좌표*/, lng: /*실 좌표*/ } },
+p8: { name: "마들스포츠타운 공영주차장", openTime: "09:00", closeTime: "19:00", unitTime: 5, feePerUnit: 150, coords: {/*...*/} },
+p9: { name: "상계역 서측 공영주차장", openTime: "09:00", closeTime: "19:00", unitTime: 5, feePerUnit: 150, coords: {/*...*/} },
+p10: { name: "동막골 공영주차장", openTime: "00:00", closeTime: "24:00", unitTime: 5, feePerUnit: 0, coords: {/*...*/} },
+p11: { name: "구청부설주차장", openTime: "09:00", closeTime: "20:00", unitTime: 5, feePerUnit: 250, coords: {/*...*/} },
+
     };
 
     const btns = document.querySelectorAll(".parking-btn");
