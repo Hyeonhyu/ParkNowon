@@ -441,27 +441,7 @@
       feeResult.textContent = "";
     }
 
-    // 요금 계산 버튼 이벤트 연결
-    document.querySelectorAll(".fee-calculator button").forEach(button => {
-      button.addEventListener("click", () => {
-        const targetId = button.dataset.target;
-        const card = document.getElementById(targetId);
-        const input = card.querySelector("input[type=number]");
-        const feeResult = card.querySelector(".fee-result");
 
-        const minutes = parseInt(input.value);
-        if (isNaN(minutes) || minutes <= 0) {
-          feeResult.textContent = "유효한 주차 시간을 입력하세요.";
-          return;
-        }
-
-        const data = parkingData[targetId];
-        const units = Math.ceil(minutes / data.unitTime);
-        const fee = units * data.feePerUnit;
-
-        feeResult.textContent = `주차 요금은 약 ${fee.toLocaleString()}원 입니다.`;
-      });
-    });
 
     // 카카오 지도 초기화 함수
     function initMap(targetId, coords) {
