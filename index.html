@@ -167,6 +167,26 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .detail-card {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+.detail-card.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+    @media (max-width: 768px) {
+  .parking-btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+  .detail-card {
+    width: 95%;
+    left: 2.5%;
+    padding: 1rem;
+  }
+}
   </style>
 </head>
 <body>
