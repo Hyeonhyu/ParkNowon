@@ -2,7 +2,8 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>파크노원 - 노원구 공영주차장 안내</title>
+  <title>▶ 파크노원 - 노원구 공영주차장 안내</title>
+  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=여기에_API_KEY_입력&libraries=services"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -33,11 +34,14 @@
       border-radius: 25px;
       outline: none;
       box-shadow: 0 4px 10px rgba(0,153,255,0.15);
+      transition: box-shadow 0.3s ease;
+    }
+    .search-input:focus {
+      box-shadow: 0 4px 14px rgba(0,153,255,0.3);
     }
     .btn-container {
       text-align: center;
       margin-bottom: 40px;
-      flex-wrap: wrap;
     }
     .parking-btn {
       background-color: #0099ff;
@@ -49,10 +53,15 @@
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,153,255,0.3);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      user-select: none;
       display: inline-block;
     }
     .parking-btn:hover {
       background-color: #007acc;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0,122,204,0.5);
     }
     .detail-card {
       max-width: 600px;
@@ -62,8 +71,11 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       padding: 24px 30px;
       font-size: 1.1rem;
+      color: #222;
+      line-height: 1.5;
       display: none;
       position: relative;
+      animation: fadeInUp 0.5s ease forwards;
     }
     .detail-card.active {
       display: block;
@@ -71,7 +83,11 @@
     .detail-card h3 {
       margin-top: 0;
       color: #ff6b6b;
+      font-weight: 700;
       margin-bottom: 14px;
+    }
+    .detail-card p {
+      margin: 8px 0;
     }
     .close-btn {
       position: absolute;
@@ -80,39 +96,67 @@
       background: #ff6b6b;
       border: none;
       color: white;
+      font-weight: 700;
       font-size: 1.2rem;
       width: 30px;
       height: 30px;
       border-radius: 50%;
       cursor: pointer;
+      line-height: 30px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(255, 107, 107, 0.7);
     }
-    .status-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      font-size: 0.9rem;
-      font-weight: bold;
-      border-radius: 12px;
-      margin-left: 10px;
+    .close-btn:hover {
+      background: #e04343;
     }
-    .open { background-color: #2ecc71; color: white; }
-    .closed { background-color: #e74c3c; color: white; }
-
     .fee-calc {
       margin-top: 20px;
     }
-    .fee-calc input {
-      padding: 6px 12px;
-      width: 80px;
+    .fee-calc label {
+      margin-right: 8px;
+      font-weight: 600;
     }
-
-    @media screen and (max-width: 600px) {
-      .parking-btn {
-        width: 90%;
-      }
-      .detail-card {
-        padding: 16px;
-        font-size: 1rem;
-      }
+    .minute-input {
+      width: 80px;
+      padding: 6px 10px;
+      border: 1.5px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+    .minute-input:focus {
+      border-color: #0099ff;
+    }
+    .calc-btn {
+      margin-left: 12px;
+      padding: 8px 18px;
+      background-color: #0099ff;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .calc-btn:hover {
+      background-color: #007acc;
+    }
+    .fee-result {
+      margin-left: 16px;
+      font-weight: 700;
+      color: #005f99;
+    }
+    #map {
+      width: 100%;
+      height: 350px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      margin-bottom: 40px;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -123,7 +167,7 @@
     <input type="text" class="search-input" id="searchInput" placeholder="🔍 주차장 이름을 검색하세요...">
   </div>
 
-  <div class="btn-container">
+  <div class="btn-container" id="btnContainer">
     <button class="parking-btn" data-target="p1">공릉동 공영주차장</button>
     <button class="parking-btn" data-target="p2">석계역 공영주차장</button>
     <button class="parking-btn" data-target="p3">중계근린공원</button>
@@ -132,88 +176,223 @@
     <button class="parking-btn" data-target="p6">한글비 공영주차장</button>
   </div>
 
-  <!-- 상세 카드 템플릿 -->
-  <div id="p1" class="detail-card" data-open="09:00" data-close="19:00" data-fee="320">
-    <button class="close-btn">&times;</button>
-    <h3>공릉동 공영주차장 <span class="status-badge"></span></h3>
+  <div id="map"></div>
+
+  <!-- 주차장 상세 정보 -->
+  <div id="p1" class="detail-card" data-lat="37.619454" data-lng="127.075592" data-open="09:00" data-close="19:00" data-fee="320">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>공릉동 공영주차장</h3>
     <p><strong>주소:</strong> 서울 노원구 공릉동 633-19</p>
     <p><strong>운영시간:</strong> 09:00 ~ 19:00</p>
     <p><strong>요금:</strong> 5분당 320원</p>
     <div class="fee-calc">
-      <label>이용 분:</label>
-      <input type="number" min="5" step="5" class="minute-input" />
+      <label for="minutesP1">이용 분:</label>
+      <input type="number" min="5" step="5" class="minute-input" id="minutesP1" />
       <button class="calc-btn">요금 계산</button>
       <span class="fee-result"></span>
     </div>
   </div>
 
-  <!-- 나머지 주차장들도 동일 구조로 추가 -->
-  <!-- p2 ~ p6은 필요 시 붙여줄게! -->
+  <div id="p2" class="detail-card" data-lat="37.615708" data-lng="127.059903" data-open="00:00" data-close="24:00" data-fee="260">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>석계역 공영주차장</h3>
+    <p><strong>주소:</strong> 서울 노원구 월계동 50-9</p>
+    <p><strong>운영시간:</strong> 00:00 ~ 24:00</p>
+    <p><strong>요금:</strong> 5분당 260원</p>
+    <div class="fee-calc">
+      <label for="minutesP2">이용 분:</label>
+      <input type="number" min="5" step="5" class="minute-input" id="minutesP2" />
+      <button class="calc-btn">요금 계산</button>
+      <span class="fee-result"></span>
+    </div>
+  </div>
 
-  <script>
-    const btns = document.querySelectorAll(".parking-btn");
-    const cards = document.querySelectorAll(".detail-card");
-    const closeBtns = document.querySelectorAll(".close-btn");
-    const searchInput = document.getElementById("searchInput");
+  <div id="p3" class="detail-card" data-lat="37.627593" data-lng="127.058335" data-open="09:00" data-close="19:00" data-fee="250">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>중계근린공원</h3>
+    <p><strong>주소:</strong> 서울 노원구 중계2동 507</p>
+    <p><strong>운영시간:</strong> 09:00 ~ 19:00</p>
+    <p><strong>요금:</strong> 5분당 250원</p>
+    <div class="fee-calc">
+      <label for="minutesP3">이용 분:</label>
+      <input type="number" min="5" step="5" class="minute-input" id="minutesP3" />
+      <button class="calc-btn">요금 계산</button>
+      <span class="fee-result"></span>
+    </div>
+  </div>
 
-    function checkOpen(open, close) {
-      const now = new Date();
-      const nowMin = now.getHours() * 60 + now.getMinutes();
-      const [oh, om] = open.split(":").map(Number);
-      const [ch, cm] = close.split(":").map(Number);
-      const openMin = oh * 60 + om;
-      const closeMin = ch * 60 + cm;
-      return nowMin >= openMin && nowMin <= closeMin;
+  <div id="p4" class="detail-card" data-lat="37.642088" data-lng="127.052989" data-open="10:00" data-close="21:00" data-fee="250">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>등나무근린공원</h3>
+    <p><strong>주소:</strong> 서울 노원구 중계3동 508-1</p>
+    <p><strong>운영시간:</strong> 10:00 ~ 21:00</p>
+    <p><strong>요금:</strong> 5분당 250원</p>
+    <div class="fee-calc">
+      <label for="minutesP4">이용 분:</label>
+      <input type="number" min="5" step="5" class="minute-input" id="minutesP4" />
+      <button class="calc-btn">요금 계산</button>
+      <span class="fee-result"></span>
+    </div>
+  </div>
+
+  <div id="p5" class="detail-card" data-lat="37.657802" data-lng="127.059085" data-open="00:00" data-close="24:00" data-fee="150">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>상계2동 공영주차장</h3>
+    <p><strong>주소:</strong> 서울 노원구 상계동 373-13</p>
+    <p><strong>운영시간:</strong> 00:00 ~ 24:00</p>
+    <p><strong>요금:</strong> 5분당 150원</p>
+    <div class="fee-calc">
+      <label for="minutesP5">이용 분:</label>
+      <input type="number" min="5" step="5" class="minute-input" id="minutesP5" />
+      <button class="calc-btn">요금 계산</button>
+      <span class="fee-result"></span>
+    </div>
+  </div>
+
+  <div id="p6" class="detail-card" data-lat="37.652441" data-lng="127.054007" data-open="00:00" data-close="24:00" data-fee="150">
+    <button class="close-btn" aria-label="닫기">&times;</button>
+    <h3>한글비 공영주차장</h3>
+    <p><strong>주소:</strong> 서울 노원구 하계동 256-1</p>
+    <p><strong>운영시간:</strong> 00:00 ~ 24:00</p>
+    <p><strong>요금:</strong> 5분당 150원</p>
+    <div class="fee-calc">
+      <label for="minutesP6">이용 분:</label>
+      <input type="number" min="5" step="5" class="minute-input" id="minutesP6" />
+      <button class="calc-btn">요금 계산</button>
+      <span class="fee-result"></span>
+    </div>
+  </div>
+
+<script>
+  // 지도 생성 및 마커 표시
+  var mapContainer = document.getElementById('map');
+  var mapOption = {
+    center: new kakao.maps.LatLng(37.62, 127.07),
+    level: 13
+  };
+  var map = new kakao.maps.Map(mapContainer, mapOption);
+
+  var markers = [];
+  var infoWindows = [];
+
+  // 주차장 정보 배열
+  var parkingData = [
+    {id: 'p1', title: '공릉동 공영주차장', lat: 37.619454, lng: 127.075592, open: '09:00', close: '19:00', fee: 320, addr: '서울 노원구 공릉동 633-19'},
+    {id: 'p2', title: '석계역 공영주차장', lat: 37.615708, lng: 127.059903, open: '00:00', close: '24:00', fee: 260, addr: '서울 노원구 월계동 50-9'},
+    {id: 'p3', title: '중계근린공원', lat: 37.627593, lng: 127.058335, open: '09:00', close: '19:00', fee: 250, addr: '서울 노원구 중계2동 507'},
+    {id: 'p4', title: '등나무근린공원', lat: 37.642088, lng: 127.052989, open: '10:00', close: '21:00', fee: 250, addr: '서울 노원구 중계3동 508-1'},
+    {id: 'p5', title: '상계2동 공영주차장', lat: 37.657802, lng: 127.059085, open: '00:00', close: '24:00', fee: 150, addr: '서울 노원구 상계동 373-13'},
+    {id: 'p6', title: '한글비 공영주차장', lat: 37.652441, lng: 127.054007, open: '00:00', close: '24:00', fee: 150, addr: '서울 노원구 하계동 256-1'}
+  ];
+
+  // 마커 만들기 및 지도에 표시
+  parkingData.forEach(function(parking) {
+    var marker = new kakao.maps.Marker({
+      map: map,
+      position: new kakao.maps.LatLng(parking.lat, parking.lng),
+      title: parking.title
+    });
+    markers.push(marker);
+
+    var infowindow = new kakao.maps.InfoWindow({
+      content: '<div style="padding:5px; font-size:14px;">' + parking.title + '</div>'
+    });
+    infoWindows.push(infowindow);
+
+    kakao.maps.event.addListener(marker, 'click', function() {
+      closeAllInfoWindows();
+      infowindow.open(map, marker);
+      showDetail(parking.id);
+    });
+  });
+
+  // 모든 InfoWindow 닫기
+  function closeAllInfoWindows() {
+    infoWindows.forEach(function(info) {
+      info.close();
+    });
+  }
+
+  // 주차장 버튼 클릭 시 상세 정보 표시 및 지도 이동
+  var btnContainer = document.getElementById('btnContainer');
+  btnContainer.addEventListener('click', function(e) {
+    if(e.target.classList.contains('parking-btn')){
+      var targetId = e.target.getAttribute('data-target');
+      var parking = parkingData.find(p => p.id === targetId);
+      if(parking){
+        showDetail(targetId);
+        moveMap(parking.lat, parking.lng);
+        closeAllInfoWindows();
+      }
     }
+  });
 
-    btns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const targetId = btn.dataset.target;
-        cards.forEach(card => {
-          if (card.id === targetId) {
-            // 운영 여부 표시
-            const badge = card.querySelector(".status-badge");
-            const open = card.dataset.open;
-            const close = card.dataset.close;
-            if (checkOpen(open, close)) {
-              badge.textContent = "운영 중";
-              badge.className = "status-badge open";
-            } else {
-              badge.textContent = "운영 종료";
-              badge.className = "status-badge closed";
-            }
-            card.classList.add("active");
-          } else {
-            card.classList.remove("active");
-          }
-        });
-      });
-    });
+  // 상세 정보 표시 함수
+  function showDetail(id){
+    // 모든 상세카드 숨기기
+    document.querySelectorAll('.detail-card').forEach(card => card.classList.remove('active'));
+    // 보여줄 카드 보이기
+    var card = document.getElementById(id);
+    card.classList.add('active');
+    // 요금 결과 초기화
+    card.querySelector('.fee-result').textContent = '';
+    // 이용분 입력 초기화
+    card.querySelector('.minute-input').value = '';
+  }
 
-    closeBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        btn.parentElement.classList.remove("active");
-      });
-    });
+  // 지도 중심 이동 함수
+  function moveMap(lat, lng){
+    var moveLatLng = new kakao.maps.LatLng(lat, lng);
+    map.panTo(moveLatLng);
+  }
 
-    searchInput.addEventListener("input", () => {
-      const keyword = searchInput.value.trim().toLowerCase();
-      btns.forEach(btn => {
-        const text = btn.textContent.toLowerCase();
-        btn.style.display = text.includes(keyword) ? "inline-block" : "none";
-      });
+  // 닫기 버튼 기능
+  document.querySelectorAll('.close-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      btn.parentElement.classList.remove('active');
+      closeAllInfoWindows();
     });
+  });
 
-    // 요금 계산
-    document.querySelectorAll(".calc-btn").forEach((btn, idx) => {
-      btn.addEventListener("click", () => {
-        const card = btn.closest(".detail-card");
-        const minutes = card.querySelector(".minute-input").value;
-        const fee = parseInt(card.dataset.fee);
-        const result = Math.ceil(minutes / 5) * fee;
-        card.querySelector(".fee-result").textContent = `예상요금: ${result.toLocaleString()}원`;
-      });
+  // 요금 계산 기능
+  document.querySelectorAll('.calc-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var card = btn.closest('.detail-card');
+      var feePer5Min = parseInt(card.getAttribute('data-fee'));
+      var input = card.querySelector('.minute-input');
+      var resultSpan = card.querySelector('.fee-result');
+      var minutes = parseInt(input.value);
+
+      if(isNaN(minutes) || minutes < 5){
+        alert('이용 분은 최소 5분 이상 입력해주세요.');
+        return;
+      }
+      if(minutes % 5 !== 0){
+        alert('이용 분은 5분 단위로 입력해주세요.');
+        return;
+      }
+
+      var totalFee = Math.ceil(minutes / 5) * feePer5Min;
+      resultSpan.textContent = '요금: ' + totalFee.toLocaleString() + '원';
     });
-  </script>
+  });
+
+  // 검색 기능
+  var searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', function(){
+    var query = searchInput.value.trim().toLowerCase();
+    var buttons = btnContainer.querySelectorAll('.parking-btn');
+
+    buttons.forEach(function(btn){
+      var name = btn.textContent.toLowerCase();
+      if(name.includes(query)){
+        btn.style.display = 'inline-block';
+      } else {
+        btn.style.display = 'none';
+      }
+    });
+  });
+
+</script>
 </body>
 </html>
