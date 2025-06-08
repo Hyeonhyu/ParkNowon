@@ -167,26 +167,6 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .detail-card {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.3s ease;
-}
-.detail-card.active {
-  opacity: 1;
-  transform: translateY(0);
-}
-    @media (max-width: 768px) {
-  .parking-btn {
-    width: 100%;
-    margin: 5px 0;
-  }
-  .detail-card {
-    width: 95%;
-    left: 2.5%;
-    padding: 1rem;
-  }
-}
   </style>
 </head>
 <body>
@@ -441,7 +421,27 @@
       feeResult.textContent = "";
     }
 
+    // 요금 계산 버튼 이벤트 연결
+    document.querySelectorAll(".fee-calculator button").forEach(button => {
+      button.addEventListener("click", () => {
+        const targetId = button.dataset.target;
+        const card = document.getElementById(targetId);
+        const input = card.querySelector("input[type=number]");
+        const feeResult = card.querySelector(".fee-result");
 
+        const minutes = parseInt(input.value);
+        if (isNaN(minutes) || minutes <= 0) {
+          feeResult.textContent = "유효한 주차 시간을 입력하세요.";
+          return;
+        }
+
+        const data = parkingData[targetId];
+        const units = Math.ceil(minutes / data.unitTime);
+        const fee = units * data.feePerUnit;
+
+        feeResult.textContent = `주차 요금은 약 ${fee.toLocaleString()}원 입니다.`;
+      });
+    });
 
     // 카카오 지도 초기화 함수
     function initMap(targetId, coords) {
@@ -461,93 +461,6 @@
         map: map,
       });
     }
-    // 현재 시간 확인 및 주차장 상태 표시
-function updateParkingStatus() {
-  const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-  Object.keys(parkingData).forEach(id => {
-    const card = document.getElementById(id);
-    const statusDiv = card.querySelector('.status');
-
-    const [openH, openM] = parkingData[id].openTime.split(":").map(Number);
-    const [closeH, closeM] = parkingData[id].closeTime.split(":").map(Number);
-    const openMin = openH * 60 + openM;
-    const closeMin = closeH * 60 + closeM;
-
-    if (nowMinutes >= openMin && nowMinutes <= closeMin) {
-      statusDiv.textContent = "운영 중";
-      statusDiv.className = "status open";
-    } else {
-      statusDiv.textContent = "운영 종료";
-      statusDiv.className = "status closed";
-    }
-  });
-}
-
-// 주차 요금 계산기
-document.querySelectorAll('.fee-calculator button').forEach(button => {
-  button.addEventListener('click', () => {
-    const id = button.dataset.target;
-    const input = document.querySelector(`#time-${id}`);
-    const resultDiv = document.querySelector(`#${id} .fee-result`);
-    const minutes = parseInt(input.value, 10);
-    if (isNaN(minutes) || minutes < 0) {
-      resultDiv.textContent = "유효한 시간을 입력하세요.";
-      return;
-    }
-
-    const { unitTime, feePerUnit } = parkingData[id];
-    const fee = Math.ceil(minutes / unitTime) * feePerUnit;
-    resultDiv.textContent = `예상 요금: ${fee.toLocaleString()}원`;
-  });
-});
-
-// 버튼 클릭 시 상세 정보 표시
-document.querySelectorAll('.parking-btn').forEach(button => {
-  button.addEventListener('click', () => {
-    document.querySelectorAll('.detail-card').forEach(card => card.classList.remove('active'));
-    const targetId = button.dataset.target;
-    document.getElementById(targetId).classList.add('active');
-    loadMap(targetId);
-    updateParkingStatus();
-  });
-});
-
-// 닫기 버튼
-document.querySelectorAll('.close-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    btn.closest('.detail-card').classList.remove('active');
-  });
-});
-
-// 검색 기능
-document.getElementById('searchInput').addEventListener('input', e => {
-  const keyword = e.target.value.toLowerCase();
-  document.querySelectorAll('.parking-btn').forEach(button => {
-    const text = button.textContent.toLowerCase();
-    button.style.display = text.includes(keyword) ? 'inline-block' : 'none';
-  });
-});
-
-// 카카오 지도 로딩
-function loadMap(id) {
-  const { coords, name } = parkingData[id];
-  const container = document.getElementById(`map-${id}`);
-  container.innerHTML = ''; // 기존 지도 초기화
-  const map = new kakao.maps.Map(container, {
-    center: new kakao.maps.LatLng(coords.lat, coords.lng),
-    level: 3
-  });
-  new kakao.maps.Marker({
-    map,
-    position: new kakao.maps.LatLng(coords.lat, coords.lng),
-    title: name
-  });
-}
-
-// 초기 실행
-updateParkingStatus();
   </script>
   <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=035aaf91d9f105f47d3767d32cd58515"></script>
 
